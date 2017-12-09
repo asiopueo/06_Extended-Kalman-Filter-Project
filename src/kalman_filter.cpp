@@ -24,7 +24,7 @@ void KalmanFilter::Init_Update(MatrixXd &H_in, MatrixXd &R_in)
 void KalmanFilter::Predict() 
 {
     // TODO: predict the state
-    x_ = F_ * x_ ;//+ Q_ * x_;
+    x_ = F_ * x_ ;
     P_ = F_ * P_ * F_.transpose() + Q_;
 }
 
@@ -58,24 +58,29 @@ void KalmanFilter::UpdateEKF(const VectorXd &z)
     VectorXd y = VectorXd(3);
     MatrixXd S, K, Ht, Si;
 
-    float px = x_(0);
-    float py = x_(1);
-    float vx = x_(2);
-    float vy = x_(3);
+    double px = x_(0);
+    double py = x_(1);
+    double vx = x_(2);
+    double vy = x_(3);
 
-    float sq = sqrt(px*px+py*py);
+    double sq = sqrt(px*px+py*py);
     VectorXd h_ = VectorXd(3);
     MatrixXd I = MatrixXd::Identity(4, 4);
 
     //h_ << sq, atan2(py, px), (px*vx+py*vy) / sq;
     h_(0) = sq;
 
-    
-
-    h_(1) = atan2(py, px); // atan2 returns values between -pi and +pi
-    h_(2) = (px*vx+py*vy)/sq;
+    if (fabs(px)<0.0001 || fabs(py)<0.0001) {
+        h_(1) = 0.0;
+        h_(2) = 0.0;
+    }
+    else {
+        h_(1) = atan2(py, px); // atan2 returns values between -pi and +pi
+        h_(2) = (px*vx+py*vy)/sq;
+    }
 
     y = z - h_;
+       
     
     // Normalizes y(1) to values between -PI and PI:
     if (y(1) > PI)
