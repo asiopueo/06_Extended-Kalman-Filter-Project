@@ -52,6 +52,7 @@ void KalmanFilter::Update(const VectorXd &z)
 void KalmanFilter::UpdateEKF(const VectorXd &z) 
 {
     // TODO: update the state by using Extended Kalman Filter equations
+    const double PI = 4*atan(1);
 
     // KF Measurement update step
     VectorXd y = VectorXd(3);
@@ -66,21 +67,30 @@ void KalmanFilter::UpdateEKF(const VectorXd &z)
     VectorXd h_ = VectorXd(3);
     MatrixXd I = MatrixXd::Identity(4, 4);
 
-    //h_ << sq, atan2(py, px), px*vx+py*vy / sq;
+    //h_ << sq, atan2(py, px), (px*vx+py*vy) / sq;
     h_(0) = sq;
-    h_(1) = atan2(py, px);
+
+    
+
+    h_(1) = atan2(py, px); // atan2 returns values between -pi and +pi
     h_(2) = (px*vx+py*vy)/sq;
 
     y = z - h_;
-    //std::cout << "???" << y << std::endl;
-    //y << 1.5f, 1.5f, 1.5f;
+    
+    // Normalizes y(1) to values between -PI and PI:
+    if (y(1) > PI)
+        y(1) = y(1) - 2*PI;
+    else if (y(1) < -PI)
+        y(1) = y(1) + 2*PI;
+
+
     Ht = H_.transpose();
     S = H_ * P_ * Ht + R_;
     Si = S.inverse();
     K = P_ * Ht * Si;
+
     // new state
     x_ = x_ + K * y;
     P_ = (I - K * H_) * P_;
-    //std::cout << H_ << std::endl;
 
 }

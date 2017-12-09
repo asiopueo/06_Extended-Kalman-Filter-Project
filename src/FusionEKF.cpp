@@ -65,8 +65,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
 		float px, py;
 		float ro, theta;
 		
-		// first measurement
-		//cout << "EKF: " << endl;
+		// initial measurement
 		ekf_.x_ = VectorXd(4);
 
 		// ekf_.P_ = Eigen::Identity(4, 4);
@@ -168,8 +167,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
 	{	
 		// Initialize Matrices before Update
 		Hj_ = tools.CalculateJacobian(ekf_.x_);
-		cout << ekf_.x_ << endl;
-		cout << Hj_ << endl;
 		ekf_.Init_Update(Hj_, R_radar_);
 
 		// Radar updates
@@ -183,7 +180,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack)
 	{
 		// Initialize Matrices before Update
 		ekf_.Init_Update(H_laser_, R_laser_);
-		//cout << "ekf_.H_=" << ekf_.H_ << endl;
 
 		// Laser updates
 		VectorXd z = VectorXd(2);
